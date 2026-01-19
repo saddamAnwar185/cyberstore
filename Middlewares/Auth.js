@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const Users = require('../Models/Users')
 require('dotenv').config()
 const SECRET = process.env.SECRET
 
@@ -37,7 +38,36 @@ const VerifyUserAuth = (req, res, next) => {
 }
 
 
+const verifyIsAdmin = async(req, res, next) => {
+    const token = req.cookies?.uid
+
+    try {
+        if(!token) {
+            return res.json({ success: false, message: 'Login First' })
+        }
+
+        const results = jwt.verify(token, SECRET)
+
+        if(results) {
+            const UserId = results._id
+            const admin = await Users.findById(UserId)
+            if(admin.role === "ADMIN") {
+                next()
+            } else {
+                res.json({ success: false, message: 'You are not authorized to perform this action' })
+            }
+        } else {
+            res.json({ success: false, message: 'You are not authenticated' })
+        }
+
+    } catch (error) {
+        res.json({ success: false, message: "Internal Server Error" })
+    }
+}
+
+
 module.exports = {
     setUser,
-    VerifyUserAuth
+    VerifyUserAuth,
+    verifyIsAdmin
 }

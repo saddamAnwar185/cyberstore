@@ -24,6 +24,7 @@ app.use(fileUpload({
   tempFileDir: '/tmp/',
 }))
 app.use(cors({
+  origin: "http://localhost:5173",
   credentials: true
 }))
 
